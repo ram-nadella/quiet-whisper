@@ -1,0 +1,20 @@
+# Swift Package Manager
+.build/
+Package.resolved
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# whisper.cpp dependency
+whisper.cpp/
+
+# Built app bundle
+Whisper Dictation.app/
+
+# Models
+*.bin
