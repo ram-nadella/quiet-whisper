@@ -1,0 +1,104 @@
+// EditorFooterPill.swift
+// Floating pill above the editor: copy, dot wave, record. Body fades into it
+// via a vertical gradient.
+
+import SwiftUI
+import AppKit
+
+struct EditorFooterPill: View {
+    let text: String
+    let isRecordingActive: Bool
+    let onRecord: () -> Void
+
+    @Environment(\.paperTheme) private var theme
+    @State private var copied = false
+    @State private var copyResetTask: Task<Void, Never>?
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // Soft fade so editor body dissolves into the pill.
+            LinearGradient(
+                colors: [theme.bg.opacity(0), theme.bg],
+                startPoint: .top, endPoint: .bottom
+            )
+            .frame(height: 80)
+            .allowsHitTesting(false)
+
+            HStack(spacing: 12) {
+                copyButton
+                divider
+                DotWave(active: false, count: 15, size: .sm)
+                    .frame(width: 130)
+                divider
+                SmallRecordButton(active: isRecordingActive, action: onRecord)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                Capsule().fill(theme.panel)
+            )
+            .overlay(
+                Capsule().strokeBorder(theme.line, lineWidth: 1)
+            )
+            .paperLargeShadow(theme)
+        }
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(theme.line)
+            .frame(width: 1, height: 18)
+    }
+
+    private var copyButton: some View {
+        Button {
+            copyToPasteboard()
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(Color.clear)
+                Group {
+                    if copied {
+                        PaperIcon.Check(size: 14)
+                    } else {
+                        PaperIcon.Copy(size: 14)
+                    }
+                }
+                .foregroundStyle(theme.inkSoft)
+            }
+            .frame(width: 34, height: 34)
+            .contentShape(Circle())
+        }
+        .buttonStyle(GhostCircleButtonStyle(theme: theme))
+        .accessibilityLabel(copied ? "Copied" : "Copy")
+    }
+
+    private func copyToPasteboard() {
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.setString(text, forType: .string)
+        copied = true
+        copyResetTask?.cancel()
+        copyResetTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_600_000_000) // 1600ms
+            if !Task.isCancelled { copied = false }
+        }
+    }
+}
+
+// Hover/press background for the round copy button.
+private struct GhostCircleButtonStyle: ButtonStyle {
+    let theme: PaperTheme
+    @State private var hover = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        ZStack {
+            Circle()
+                .fill(configuration.isPressed ? theme.active : (hover ? theme.hover : Color.clear))
+            configuration.label
+        }
+        .animation(.easeInOut(duration: 0.12), value: hover)
+        .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
+        .onHover { hover = $0 }
+    }
+}
