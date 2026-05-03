@@ -8,7 +8,15 @@ import AppKit
 struct EditorFooterPill: View {
     let text: String
     let isRecordingActive: Bool
+    let amplitude: Double
     let onRecord: () -> Void
+
+    init(text: String, isRecordingActive: Bool, amplitude: Double = 0, onRecord: @escaping () -> Void) {
+        self.text = text
+        self.isRecordingActive = isRecordingActive
+        self.amplitude = amplitude
+        self.onRecord = onRecord
+    }
 
     @Environment(\.paperTheme) private var theme
     @State private var copied = false
@@ -16,32 +24,33 @@ struct EditorFooterPill: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Soft fade so editor body dissolves into the pill.
             LinearGradient(
                 colors: [theme.bg.opacity(0), theme.bg],
                 startPoint: .top, endPoint: .bottom
             )
             .frame(height: 80)
+            .frame(maxWidth: .infinity)
             .allowsHitTesting(false)
 
             HStack(spacing: 12) {
                 copyButton
                 divider
-                DotWave(active: false, count: 15, size: .sm)
+                DotWave(active: isRecordingActive, amplitude: amplitude, count: 15, size: .sm)
                     .frame(width: 130)
                 divider
                 SmallRecordButton(active: isRecordingActive, action: onRecord)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(
-                Capsule().fill(theme.panel)
-            )
-            .overlay(
-                Capsule().strokeBorder(theme.line, lineWidth: 1)
-            )
+            .background(Capsule().fill(theme.panel))
+            .overlay(Capsule().strokeBorder(theme.line, lineWidth: 1))
             .paperLargeShadow(theme)
+            // Pin the pill to its intrinsic size so the Capsule background
+            // can't be stretched by the surrounding ZStack. This is the
+            // load-bearing fix for the giant-pill bug.
+            .fixedSize(horizontal: true, vertical: true)
         }
+        .frame(maxWidth: .infinity, maxHeight: 80, alignment: .bottom)
     }
 
     private var divider: some View {

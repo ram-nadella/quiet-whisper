@@ -24,7 +24,10 @@ final class SpaceKeyMonitor {
     }
 
     func start() {
-        guard keyDownMonitor == nil, keyUpMonitor == nil else { return }
+        guard keyDownMonitor == nil, keyUpMonitor == nil else {
+            QWLog.input.debug("space: start called while already started — ignoring")
+            return
+        }
 
         keyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
@@ -35,14 +38,17 @@ final class SpaceKeyMonitor {
             guard let self else { return event }
             return self.handleKeyUp(event)
         }
+        QWLog.input.notice("space: monitor started")
     }
 
     func stop() {
         if let m = keyDownMonitor { NSEvent.removeMonitor(m) }
         if let m = keyUpMonitor { NSEvent.removeMonitor(m) }
+        let wasActive = (keyDownMonitor != nil || keyUpMonitor != nil)
         keyDownMonitor = nil
         keyUpMonitor = nil
         held = false
+        if wasActive { QWLog.input.notice("space: monitor stopped") }
     }
 
     // MARK: - Handlers
@@ -55,6 +61,7 @@ final class SpaceKeyMonitor {
         if isTypingResponder() { return event }
 
         held = true
+        QWLog.input.debug("space: pressed → onPressDown")
         onPressDown()
         return nil // consume — don't insert a literal space anywhere
     }
@@ -63,6 +70,7 @@ final class SpaceKeyMonitor {
         guard event.keyCode == Self.spaceKeyCode else { return event }
         if isEnabled() && held {
             held = false
+            QWLog.input.debug("space: released → onReleaseUp")
             onReleaseUp()
             return nil
         }

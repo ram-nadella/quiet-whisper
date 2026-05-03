@@ -15,30 +15,32 @@ final class AppSettings {
         static let density    = "qw.density"
     }
 
+    @ObservationIgnored private let defaults: UserDefaults
+
     var model: WhisperModelKind {
-        didSet { UserDefaults.standard.set(model.rawValue, forKey: Keys.model) }
+        didSet { defaults.set(model.rawValue, forKey: Keys.model) }
     }
 
     var autoPunct: Bool {
-        didSet { UserDefaults.standard.set(autoPunct, forKey: Keys.autoPunct) }
+        didSet { defaults.set(autoPunct, forKey: Keys.autoPunct) }
     }
 
     var dark: Bool {
-        didSet { UserDefaults.standard.set(dark, forKey: Keys.dark) }
+        didSet { defaults.set(dark, forKey: Keys.dark) }
     }
 
     var sidebarOpen: Bool {
-        didSet { UserDefaults.standard.set(sidebarOpen, forKey: Keys.sidebar) }
+        didSet { defaults.set(sidebarOpen, forKey: Keys.sidebar) }
     }
 
     var density: EditorDensity {
-        didSet { UserDefaults.standard.set(density.rawValue, forKey: Keys.density) }
+        didSet { defaults.set(density.rawValue, forKey: Keys.density) }
     }
 
-    init() {
-        let d = UserDefaults.standard
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
 
-        if let raw = d.string(forKey: Keys.model), let m = WhisperModelKind(rawValue: raw) {
+        if let raw = defaults.string(forKey: Keys.model), let m = WhisperModelKind(rawValue: raw) {
             self.model = m
         } else {
             self.model = .small
@@ -46,14 +48,16 @@ final class AppSettings {
 
         // Bool values: object(forKey:) returns nil if unset so we can
         // distinguish "default" from an explicit false.
-        self.autoPunct   = (d.object(forKey: Keys.autoPunct) as? Bool) ?? true
-        self.dark        = (d.object(forKey: Keys.dark) as? Bool) ?? false
-        self.sidebarOpen = (d.object(forKey: Keys.sidebar) as? Bool) ?? false
+        self.autoPunct   = (defaults.object(forKey: Keys.autoPunct) as? Bool) ?? true
+        self.dark        = (defaults.object(forKey: Keys.dark) as? Bool) ?? false
+        self.sidebarOpen = (defaults.object(forKey: Keys.sidebar) as? Bool) ?? false
 
-        if let raw = d.string(forKey: Keys.density), let dens = EditorDensity(rawValue: raw) {
+        if let raw = defaults.string(forKey: Keys.density), let dens = EditorDensity(rawValue: raw) {
             self.density = dens
         } else {
             self.density = .regular
         }
+
+        QWLog.settings.notice("settings: loaded model=\(self.model.rawValue, privacy: .public) autoPunct=\(self.autoPunct, privacy: .public) dark=\(self.dark, privacy: .public) sidebarOpen=\(self.sidebarOpen, privacy: .public) density=\(self.density.rawValue, privacy: .public)")
     }
 }

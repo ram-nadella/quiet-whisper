@@ -24,6 +24,27 @@ extension Snippet {
         return String(firstSentence.prefix(50)).trimmingCharacters(in: .whitespacesAndNewlines)
             .ifEmpty("Untitled")
     }
+
+    /// Append the result of a follow-up take to this snippet. Inserts a blank
+    /// line as a separator (so dictated paragraphs are visually distinct),
+    /// extends `durationSec`, and refreshes the auto-title only if the user
+    /// hadn't customized it. Returns true if anything was actually appended.
+    @discardableResult
+    func append(transcribedText newText: String, durationSec extraDuration: Int) -> Bool {
+        let trimmed = newText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+
+        let priorText = self.text
+        let separator = priorText.isEmpty ? "" : "\n\n"
+        self.text = priorText + separator + trimmed
+
+        let priorAutoTitle = Snippet.makeTitle(from: priorText)
+        if self.title == priorAutoTitle || self.title.isEmpty || self.title == "Untitled" {
+            self.title = Snippet.makeTitle(from: self.text)
+        }
+        self.durationSec += extraDuration
+        return true
+    }
 }
 
 private extension String {

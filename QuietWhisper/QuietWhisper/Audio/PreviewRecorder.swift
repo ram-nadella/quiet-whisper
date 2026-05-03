@@ -10,6 +10,8 @@ final class PreviewRecorder: RecorderProtocol {
     private(set) var amplitude: Double = 0
     private(set) var isRecording: Bool = false
     private(set) var permission: MicPermission = .granted
+    private(set) var buffersReceived: Int = 0
+    var onAmplitudeUpdate: (@MainActor (Double) -> Void)?
 
     private var timer: Timer?
     private var ticks: Int = 0
@@ -43,5 +45,7 @@ final class PreviewRecorder: RecorderProtocol {
         }
         current += (target - current) * 0.25
         amplitude = current
+        buffersReceived &+= 1
+        onAmplitudeUpdate?(amplitude)
     }
 }

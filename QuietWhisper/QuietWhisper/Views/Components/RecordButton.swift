@@ -44,7 +44,11 @@ struct RecordButton: View {
                 .frame(width: inner, height: inner)
                 .animation(.easeInOut(duration: 0.18), value: active)
             }
-            .frame(width: size + 16, height: size + 16) // padding for halo
+            // Reserve halo room only when active. When inactive the outer
+            // frame matches the visible circle so the button sits flush
+            // inside parent layouts (e.g. the editor footer pill, which was
+            // rendering a 16-pt gap on either side of the inactive button).
+            .frame(width: active ? size + 16 : size, height: active ? size + 16 : size)
             .contentShape(Circle())
             .shadow(
                 color: active ? activeShadow : (hover ? hoverShadow : baseShadow),
