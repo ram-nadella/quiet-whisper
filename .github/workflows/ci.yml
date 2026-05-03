@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - "gh-readonly-queue/**"
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build & test
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+            ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ runner.os }}-${{ hashFiles('QuietWhisper/project.yml') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Install build tools
+        run: |
+          brew install xcodegen xcbeautify
+
+      - name: Regenerate Xcode project
+        working-directory: QuietWhisper
+        run: xcodegen generate
+
+      - name: Run tests
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project QuietWhisper/QuietWhisper.xcodeproj \
+            -scheme QuietWhisper \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions

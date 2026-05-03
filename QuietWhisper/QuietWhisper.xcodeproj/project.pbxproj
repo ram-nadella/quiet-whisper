@@ -40,6 +40,7 @@
 		F4E9CE33A194DF1B3B9F8E9F /* TranscribingStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176BB126FF5B0574E4721C91 /* TranscribingStage.swift */; };
 		F7E86143DADB2227B7AE6C3E /* ModelRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11520A172FB525B3D8DCEB61 /* ModelRow.swift */; };
 		FDB7A0F07D03BE1A1EA1E85A /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD0ABA125CE95CEB2676CBE /* DateGrouping.swift */; };
+		FF8C7D8409BF0699F16843EA /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB8323469D043FA661A58F1 /* SmokeTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +62,7 @@
 		3E601FF900A07E23EEA86A9B /* ToggleRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleRow.swift; sourceTree = "<group>"; };
 		3F6D27EF3F7E2389040B4681 /* DotWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotWave.swift; sourceTree = "<group>"; };
 		465CB89C86F964D3BCEC6640 /* QuietWhisperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuietWhisperApp.swift; sourceTree = "<group>"; };
+		4AB8323469D043FA661A58F1 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		4AFD5F0B30B55BB6E037DE13 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		4B0359376905B0DEFE4B729D /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		552E21953C40798DA5CC71A1 /* Snippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snippet.swift; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 		AAEAF89035A816F44D8E789E /* QuietWhisperTests */ = {
 			isa = PBXGroup;
 			children = (
+				4AB8323469D043FA661A58F1 /* SmokeTests.swift */,
 			);
 			path = QuietWhisperTests;
 			sourceTree = "<group>";
@@ -340,6 +343,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF8C7D8409BF0699F16843EA /* SmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build .app
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+            ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ runner.os }}-${{ hashFiles('QuietWhisper/project.yml') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Install build tools
+        run: |
+          brew install xcodegen xcbeautify
+
+      - name: Regenerate Xcode project
+        working-directory: QuietWhisper
+        run: xcodegen generate
+
+      - name: Build (Release, ad-hoc signed)
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project QuietWhisper/QuietWhisper.xcodeproj \
+            -scheme QuietWhisper \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
+            | xcbeautify --renderer github-actions
+
+      - name: Compute version label
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            label="${GITHUB_REF#refs/tags/}"
+          else
+            label="${GITHUB_SHA::7}"
+          fi
+          echo "label=${label}" >> "$GITHUB_OUTPUT"
+
+      - name: Zip the .app
+        shell: bash
+        run: |
+          cd build/Build/Products/Release
+          ditto -c -k --sequesterRsrc --keepParent \
+            QuietWhisper.app \
+            "QuietWhisper-${{ steps.version.outputs.label }}.zip"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuietWhisper-${{ steps.version.outputs.label }}
+          path: build/Build/Products/Release/QuietWhisper-${{ steps.version.outputs.label }}.zip
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Create GitHub Release (on tag only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.version.outputs.label }}
+          tag_name: ${{ steps.version.outputs.label }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: build/Build/Products/Release/QuietWhisper-${{ steps.version.outputs.label }}.zip
+          body: |
+            Quiet Whisper ${{ steps.version.outputs.label }}
+
+            Download `QuietWhisper-${{ steps.version.outputs.label }}.zip`, unzip, and move `QuietWhisper.app` to /Applications.
+
+            **First launch:** because this build is unsigned (ad-hoc), macOS Gatekeeper will block it the first time. Right-click the app and choose **Open**, then confirm in the dialog. After that it launches normally. Alternatively: `xattr -dr com.apple.quarantine /Applications/QuietWhisper.app`.
