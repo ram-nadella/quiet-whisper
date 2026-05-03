@@ -7,7 +7,7 @@ import SwiftUI
 
 struct RecordingStage: View {
     let amplitude: Double
-    let elapsed: TimeInterval
+    let startedAt: Date
     let onStop: () -> Void
 
     @Environment(\.paperTheme) private var theme
@@ -69,23 +69,29 @@ struct RecordingStage: View {
     }
 
     // MM:SS.t — minutes/seconds in ink, decisecond in mute. Tabular digits.
+    // TimelineView drives the redraw on its own schedule so we don't depend
+    // on an external Timer.publish push (which proved unreliable to wire up
+    // through the ContentView/RecordingController observation chain).
     private var timer: some View {
-        let totalMs = Int(elapsed * 1000)
-        let sec = totalMs / 1000
-        let mm = String(format: "%02d", sec / 60)
-        let ss = String(format: "%02d", sec % 60)
-        let ds = (totalMs % 1000) / 100
+        TimelineView(.periodic(from: startedAt, by: 0.1)) { ctx in
+            let elapsed = max(0, ctx.date.timeIntervalSince(startedAt))
+            let totalMs = Int(elapsed * 1000)
+            let sec = totalMs / 1000
+            let mm = String(format: "%02d", sec / 60)
+            let ss = String(format: "%02d", sec % 60)
+            let ds = (totalMs % 1000) / 100
 
-        return HStack(spacing: 0) {
-            Text("\(mm):\(ss)")
-                .font(.paperRecordingTimer)
-                .tracking(0.5)
-                .foregroundStyle(theme.ink)
-            Text(".\(ds)")
-                .font(.paperRecordingTimer)
-                .tracking(0.5)
-                .foregroundStyle(theme.mute)
+            HStack(spacing: 0) {
+                Text("\(mm):\(ss)")
+                    .font(.paperRecordingTimer)
+                    .tracking(0.5)
+                    .foregroundStyle(theme.ink)
+                Text(".\(ds)")
+                    .font(.paperRecordingTimer)
+                    .tracking(0.5)
+                    .foregroundStyle(theme.mute)
+            }
+            .monospacedDigit()
         }
-        .monospacedDigit()
     }
 }

@@ -7,7 +7,9 @@ import SwiftData
 @main
 struct QuietWhisperApp: App {
     init() {
+        QWLog.app.notice("app: launching v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?", privacy: .public) build \(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?", privacy: .public)")
         FontRegistry.registerBundledFonts()
+        QWLog.app.debug("app: fonts registered")
     }
 
     var body: some Scene {

@@ -8,8 +8,26 @@ import SwiftUI
 struct EditorStage: View {
     let snippet: Snippet
     let density: EditorDensity
+    let isRecording: Bool
+    let amplitude: Double
     let onUpdate: (String, String) -> Void
     let onRecord: () -> Void
+
+    init(
+        snippet: Snippet,
+        density: EditorDensity,
+        isRecording: Bool = false,
+        amplitude: Double = 0,
+        onUpdate: @escaping (String, String) -> Void,
+        onRecord: @escaping () -> Void
+    ) {
+        self.snippet = snippet
+        self.density = density
+        self.isRecording = isRecording
+        self.amplitude = amplitude
+        self.onUpdate = onUpdate
+        self.onRecord = onRecord
+    }
 
     @Environment(\.paperTheme) private var theme
 
@@ -40,13 +58,29 @@ struct EditorStage: View {
                 .padding(.bottom, 160)
             }
 
-            EditorFooterPill(text: text, isRecordingActive: false, onRecord: onRecord)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 20)
+            EditorFooterPill(
+                text: text,
+                isRecordingActive: isRecording,
+                amplitude: amplitude,
+                onRecord: onRecord
+            )
+            .padding(.horizontal, 24)
+            .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear { syncFromSnippet() }
+        .onAppear {
+            QWLog.ui.notice("EditorStage: appeared for snippet id=\(snippet.id, privacy: .public) title.count=\(snippet.title.count, privacy: .public) text.count=\(snippet.text.count, privacy: .public) durationSec=\(snippet.durationSec, privacy: .public)")
+            syncFromSnippet()
+        }
         .onChange(of: snippet.id) { _, _ in syncFromSnippet() }
+        // External update (e.g. append after a take) — re-sync local fields so
+        // the new text actually shows in the body.
+        .onChange(of: snippet.text) { _, newText in
+            if newText != text { syncFromSnippet() }
+        }
+        .onChange(of: snippet.title) { _, newTitle in
+            if newTitle != title { syncFromSnippet() }
+        }
         .onChange(of: title) { _, _ in scheduleSave() }
         .onChange(of: text)  { _, _ in scheduleSave() }
     }

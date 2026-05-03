@@ -79,6 +79,17 @@ protocol RecorderProtocol: AnyObject, Observable {
     var amplitude: Double { get }              // 0...1, smoothed
     var isRecording: Bool { get }
     var permission: MicPermission { get }
+    /// Number of audio buffers the tap has actually delivered during the
+    /// current/last take. Zero after a `start()` that "succeeded" but never
+    /// produced audio — sandbox blocks, format negotiation failures, muted
+    /// device, etc.
+    var buffersReceived: Int { get }
+    /// Push channel for the live amplitude. The view layer observes the
+    /// controller's mirrored `amplitude` instead of reading through an
+    /// existential `any RecorderProtocol`, because SwiftUI's observation
+    /// tracker doesn't reliably register reads through type-erased
+    /// `@Observable` chains.
+    var onAmplitudeUpdate: (@MainActor (Double) -> Void)? { get set }
 
     func requestPermission() async -> MicPermission
     func start() async throws
