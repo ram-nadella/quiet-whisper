@@ -56,7 +56,12 @@ struct DotWave: View {
                     let opacity = active ? (0.35 + amp * 0.6) : 0.7
                     let color = (active ? dotActive : dotIdle).opacity(opacity)
                     let x = startX + CGFloat(i) * size.gap
-                    let rect = CGRect(x: x - s/2, y: centerY - s/2, width: s, height: s)
+                    // Per-dot vertical bounce. Phase varies along the row so
+                    // the dots travel as a wave; magnitude scales with live
+                    // amplitude so the row only "moves" when the user speaks.
+                    let yPhase = sin(tick * 4.0 + Double(i) * 0.55)
+                    let yOffset = CGFloat(yPhase) * CGFloat(min(1.0, liveAmp)) * size.range * 0.9
+                    let rect = CGRect(x: x - s/2, y: centerY - s/2 + yOffset, width: s, height: s)
                     ctx.fill(Path(ellipseIn: rect), with: .color(color))
                 }
             }

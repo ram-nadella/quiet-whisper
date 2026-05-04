@@ -22,12 +22,6 @@ struct RecordButton: View {
 
         Button(action: action) {
             ZStack {
-                // Active halo: 8pt ring of dotIdle outside the button.
-                if active {
-                    Circle()
-                        .stroke(theme.dotIdle, lineWidth: 8)
-                        .frame(width: size + 8, height: size + 8)
-                }
                 Circle()
                     .fill(theme.recordBg)
                     .frame(width: size, height: size)
@@ -44,11 +38,19 @@ struct RecordButton: View {
                 .frame(width: inner, height: inner)
                 .animation(.easeInOut(duration: 0.18), value: active)
             }
-            // Reserve halo room only when active. When inactive the outer
-            // frame matches the visible circle so the button sits flush
-            // inside parent layouts (e.g. the editor footer pill, which was
-            // rendering a 16-pt gap on either side of the inactive button).
-            .frame(width: active ? size + 16 : size, height: active ? size + 16 : size)
+            .frame(width: size, height: size)
+            // Halo: an 8pt ring rendered as a background overlay so it
+            // visually extends 8pt past the button's layout box without
+            // pushing neighbors. Without this, the active button forced
+            // the editor footer pill to grow and the button looked like it
+            // was punching out of the white container.
+            .background {
+                Circle()
+                    .stroke(theme.dotIdle, lineWidth: 8)
+                    .frame(width: size + 8, height: size + 8)
+                    .opacity(active ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.22), value: active)
+            }
             .contentShape(Circle())
             .shadow(
                 color: active ? activeShadow : (hover ? hoverShadow : baseShadow),
