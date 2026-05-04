@@ -28,6 +28,7 @@
 		595B8AA2577C60D534C5C8C5 /* SpaceKeyMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE68B2AB83E131E66DDF498 /* SpaceKeyMonitorTests.swift */; };
 		65C6139A2483BE027E322507 /* Transcriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF4CE3409F63DF44299DC6D /* Transcriber.swift */; };
 		72BD88424189546C693FC9A0 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81AD54F5232098338DE299FB /* AppSettingsTests.swift */; };
+		7BE96CE54DA4BBE71A52BDF1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF7DE3DCF54FD68F133E2AF1 /* Assets.xcassets */; };
 		A2D9E58E208BC31370446972 /* RecordingStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21862CDCC58ED535DDDCBCC8 /* RecordingStage.swift */; };
 		AD64E6CAAF90092764BCA6F8 /* WhisperModelKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF816CBA437135FEA8FFF224 /* WhisperModelKindTests.swift */; };
 		BC365C51BD81C1D9AFB6883D /* SettingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA319BFA183B5617D5C78A1 /* SettingGroup.swift */; };
@@ -103,6 +104,7 @@
 		A95ED659478E1B2D71144D1B /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		AF816CBA437135FEA8FFF224 /* WhisperModelKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperModelKindTests.swift; sourceTree = "<group>"; };
 		B174479437D172F291756D2D /* KeyCap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCap.swift; sourceTree = "<group>"; };
+		BF7DE3DCF54FD68F133E2AF1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFFCA5BB83FF12D67AC6718F /* SpaceKeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceKeyMonitor.swift; sourceTree = "<group>"; };
 		C11881154756893106862D98 /* PaperToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperToggle.swift; sourceTree = "<group>"; };
 		C81FE46B68BA4F026310A5A4 /* QuietWhisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuietWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,13 +171,6 @@
 				3E601FF900A07E23EEA86A9B /* ToggleRow.swift */,
 			);
 			path = Settings;
-			sourceTree = "<group>";
-		};
-		74E61D1F86968C9FF28B7E4B /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Fonts;
 			sourceTree = "<group>";
 		};
 		90BE3CB0FD2AAF929D4E5203 = {
@@ -284,7 +279,7 @@
 		DB52D3577CD23A59AB28D943 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				74E61D1F86968C9FF28B7E4B /* Fonts */,
+				BF7DE3DCF54FD68F133E2AF1 /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -297,6 +292,7 @@
 			buildConfigurationList = 9567453C569EA3208A4245F7 /* Build configuration list for PBXNativeTarget "QuietWhisper" */;
 			buildPhases = (
 				A0F470AB6903B5F0D414436B /* Sources */,
+				FE839A10E0C7E1F32C5EC70A /* Resources */,
 				AC7D47EA081091210D5EC9E3 /* Frameworks */,
 			);
 			buildRules = (
@@ -370,6 +366,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FE839A10E0C7E1F32C5EC70A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7BE96CE54DA4BBE71A52BDF1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		940CB71DD470662D2924FCE3 /* Sources */ = {
