@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Quiet Whisper — Glyph (monochrome)</title>
+  
+  <ellipse cx="512" cy="540" rx="320" ry="300" fill="currentColor" opacity="0.07"></ellipse>
+  <ellipse cx="512" cy="540" rx="240" ry="225" fill="currentColor" opacity="0.13"></ellipse>
+  <path d="M 512 270 C 660 270, 780 360, 780 510 C 780 640, 700 740, 560 760 C 460 774, 360 740, 300 660 C 250 590, 250 490, 310 410 C 360 340, 430 270, 512 270 Z" fill="currentColor"></path>
+</svg>
