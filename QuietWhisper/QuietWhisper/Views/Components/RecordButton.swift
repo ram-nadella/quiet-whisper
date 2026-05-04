@@ -56,7 +56,6 @@ struct RecordButton: View {
                 x: 0,
                 y: active ? 8 : (hover ? 4 : 2)
             )
-            .offset(y: (hover && !active) ? -1 : 0)
             .animation(.easeInOut(duration: 0.22), value: hover)
             .animation(.easeInOut(duration: 0.22), value: active)
         }

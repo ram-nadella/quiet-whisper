@@ -8,14 +8,22 @@ import AppKit
 struct EditorFooterPill: View {
     let text: String
     let isRecordingActive: Bool
-    let amplitude: Double
+    let amplitudeProvider: () -> Double
     let onRecord: () -> Void
+    let onNewNote: (() -> Void)?
 
-    init(text: String, isRecordingActive: Bool, amplitude: Double = 0, onRecord: @escaping () -> Void) {
+    init(
+        text: String,
+        isRecordingActive: Bool,
+        amplitude: @escaping () -> Double = { 0 },
+        onRecord: @escaping () -> Void,
+        onNewNote: (() -> Void)? = nil
+    ) {
         self.text = text
         self.isRecordingActive = isRecordingActive
-        self.amplitude = amplitude
+        self.amplitudeProvider = amplitude
         self.onRecord = onRecord
+        self.onNewNote = onNewNote
     }
 
     @Environment(\.paperTheme) private var theme
@@ -33,9 +41,13 @@ struct EditorFooterPill: View {
             .allowsHitTesting(false)
 
             HStack(spacing: 12) {
+                if let onNewNote {
+                    newNoteButton(action: onNewNote)
+                    divider
+                }
                 copyButton
                 divider
-                DotWave(active: isRecordingActive, amplitude: amplitude, count: 15, size: .sm)
+                DotWave(active: isRecordingActive, amplitude: amplitudeProvider, count: 15, size: .sm)
                     .frame(width: 130)
                 divider
                 SmallRecordButton(active: isRecordingActive, action: onRecord)
@@ -79,7 +91,24 @@ struct EditorFooterPill: View {
             .contentShape(Circle())
         }
         .buttonStyle(GhostCircleButtonStyle(theme: theme))
+        .help(copied ? "Copied" : "Copy")
         .accessibilityLabel(copied ? "Copied" : "Copy")
+    }
+
+    private func newNoteButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(Color.clear)
+                PaperIcon.Plus(size: 14)
+                    .foregroundStyle(theme.inkSoft)
+            }
+            .frame(width: 34, height: 34)
+            .contentShape(Circle())
+        }
+        .buttonStyle(GhostCircleButtonStyle(theme: theme))
+        .help("New note")
+        .accessibilityLabel("New note")
     }
 
     private func copyToPasteboard() {
