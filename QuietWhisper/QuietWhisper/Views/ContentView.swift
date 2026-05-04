@@ -108,13 +108,13 @@ struct ContentView: View {
                     snippet: snippet,
                     density: settings.density,
                     isRecording: false,
-                    amplitude: 0,
                     onUpdate: { title, text in
                         snippet.title = title
                         snippet.text = text
                         try? ctx.save()
                     },
-                    onRecord: toggleRecord
+                    onRecord: toggleRecord,
+                    onNewNote: newNote
                 )
             } else if controller.permissionDenied {
                 MicPermissionPanel()
@@ -134,7 +134,7 @@ struct ContentView: View {
                     snippet: snippet,
                     density: settings.density,
                     isRecording: true,
-                    amplitude: controller.amplitude,
+                    amplitude: { [controller] in controller.amplitude },
                     onUpdate: { title, text in
                         snippet.title = title
                         snippet.text = text
@@ -144,7 +144,7 @@ struct ContentView: View {
                 )
             } else {
                 RecordingStage(
-                    amplitude: controller.amplitude,
+                    amplitude: { [controller] in controller.amplitude },
                     startedAt: startedAt,
                     onStop: toggleRecord
                 )
@@ -158,7 +158,6 @@ struct ContentView: View {
                     snippet: snippet,
                     density: settings.density,
                     isRecording: false,
-                    amplitude: 0,
                     onUpdate: { title, text in
                         snippet.title = title
                         snippet.text = text
@@ -261,7 +260,6 @@ struct ContentView: View {
 
     private func newNote() {
         selectedID = nil
-        if !settings.sidebarOpen { settings.sidebarOpen = true }
     }
 
     // MARK: - Hold-space

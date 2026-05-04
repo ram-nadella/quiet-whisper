@@ -32,6 +32,8 @@ struct SidebarView: View {
                     IconButton(action: onNew) { PaperIcon.Plus() }
                     IconButton(action: onClose) { PaperIcon.Sidebar() }
                 }
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, 4)
             }
             .padding(.leading, 82)
             .padding(.trailing, 12)

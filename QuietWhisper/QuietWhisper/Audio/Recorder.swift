@@ -218,11 +218,16 @@ final class AudioRecorder: RecorderProtocol {
             sumSq += v * v
         }
         let rms = (n > 0) ? (sumSq / Double(n)).squareRoot() : 0
-        let boosted = min(1.0, rms * 4.5)
+        // Voice RMS at normal speaking volume sits around 0.05–0.10. The 8x
+        // gain pushes that into the 0.4–0.8 band so the waveform reads as
+        // alive without ambient room noise pinning it at 1.0.
+        let boosted = min(1.0, rms * 8.0)
 
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.amplitude += (boosted - self.amplitude) * 0.35
+            // Snappier than 0.35 — the dots otherwise lag the user's voice
+            // enough to feel disconnected.
+            self.amplitude += (boosted - self.amplitude) * 0.55
             self.buffersReceived &+= 1
             self.onAmplitudeUpdate?(self.amplitude)
         }

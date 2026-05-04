@@ -17,7 +17,7 @@ enum WaveSize {
 
 struct DotWave: View {
     let active: Bool
-    let amplitude: Double
+    let amplitudeProvider: () -> Double
     let count: Int
     let size: WaveSize
 
@@ -25,7 +25,14 @@ struct DotWave: View {
 
     init(active: Bool, amplitude: Double = 0, count: Int = 21, size: WaveSize) {
         self.active = active
-        self.amplitude = amplitude
+        self.amplitudeProvider = { amplitude }
+        self.count = count
+        self.size = size
+    }
+
+    init(active: Bool, amplitude: @escaping () -> Double, count: Int = 21, size: WaveSize) {
+        self.active = active
+        self.amplitudeProvider = amplitude
         self.count = count
         self.size = size
     }
@@ -33,6 +40,9 @@ struct DotWave: View {
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0/60.0, paused: false)) { context in
             let tick = context.date.timeIntervalSinceReferenceDate
+            // Re-read amplitude every frame so live mic level shows up even if
+            // the parent isn't re-rendering on each @Observable update.
+            let liveAmp = amplitudeProvider()
             Canvas { ctx, canvasSize in
                 let centerY = canvasSize.height / 2
                 let totalWidth = CGFloat(count - 1) * size.gap
@@ -41,12 +51,17 @@ struct DotWave: View {
                 let dotActive = theme.dotActive
 
                 for i in 0..<count {
-                    let amp = amplitudeFor(i: i, tick: tick)
+                    let amp = amplitudeFor(i: i, tick: tick, amplitude: liveAmp)
                     let s = size.base + CGFloat(amp) * size.range
                     let opacity = active ? (0.35 + amp * 0.6) : 0.7
                     let color = (active ? dotActive : dotIdle).opacity(opacity)
                     let x = startX + CGFloat(i) * size.gap
-                    let rect = CGRect(x: x - s/2, y: centerY - s/2, width: s, height: s)
+                    // Per-dot vertical bounce. Phase varies along the row so
+                    // the dots travel as a wave; magnitude scales with live
+                    // amplitude so the row only "moves" when the user speaks.
+                    let yPhase = sin(tick * 4.0 + Double(i) * 0.55)
+                    let yOffset = CGFloat(yPhase) * CGFloat(min(1.0, liveAmp)) * size.range * 0.9
+                    let rect = CGRect(x: x - s/2, y: centerY - s/2 + yOffset, width: s, height: s)
                     ctx.fill(Path(ellipseIn: rect), with: .color(color))
                 }
             }
@@ -56,7 +71,7 @@ struct DotWave: View {
 
     /// Per-dot amplitude. Matches qw-wave.jsx exactly: idle uses a slow drift; active
     /// uses a centered bell envelope multiplied by a fast phase plus a higher-frequency jitter.
-    private func amplitudeFor(i: Int, tick: TimeInterval) -> Double {
+    private func amplitudeFor(i: Int, tick: TimeInterval, amplitude: Double) -> Double {
         if !active {
             let drift = (sin(tick * 0.6 + Double(i) * 0.4) + 1) * 0.04
             return 0.08 + drift

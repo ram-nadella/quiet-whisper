@@ -9,24 +9,27 @@ struct EditorStage: View {
     let snippet: Snippet
     let density: EditorDensity
     let isRecording: Bool
-    let amplitude: Double
+    let amplitudeProvider: () -> Double
     let onUpdate: (String, String) -> Void
     let onRecord: () -> Void
+    let onNewNote: (() -> Void)?
 
     init(
         snippet: Snippet,
         density: EditorDensity,
         isRecording: Bool = false,
-        amplitude: Double = 0,
+        amplitude: @escaping () -> Double = { 0 },
         onUpdate: @escaping (String, String) -> Void,
-        onRecord: @escaping () -> Void
+        onRecord: @escaping () -> Void,
+        onNewNote: (() -> Void)? = nil
     ) {
         self.snippet = snippet
         self.density = density
         self.isRecording = isRecording
-        self.amplitude = amplitude
+        self.amplitudeProvider = amplitude
         self.onUpdate = onUpdate
         self.onRecord = onRecord
+        self.onNewNote = onNewNote
     }
 
     @Environment(\.paperTheme) private var theme
@@ -61,8 +64,9 @@ struct EditorStage: View {
             EditorFooterPill(
                 text: text,
                 isRecordingActive: isRecording,
-                amplitude: amplitude,
-                onRecord: onRecord
+                amplitude: amplitudeProvider,
+                onRecord: onRecord,
+                onNewNote: onNewNote
             )
             .padding(.horizontal, 24)
             .padding(.bottom, 20)

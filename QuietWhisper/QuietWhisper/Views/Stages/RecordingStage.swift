@@ -6,9 +6,15 @@
 import SwiftUI
 
 struct RecordingStage: View {
-    let amplitude: Double
+    let amplitudeProvider: () -> Double
     let startedAt: Date
     let onStop: () -> Void
+
+    init(amplitude: @escaping () -> Double, startedAt: Date, onStop: @escaping () -> Void) {
+        self.amplitudeProvider = amplitude
+        self.startedAt = startedAt
+        self.onStop = onStop
+    }
 
     @Environment(\.paperTheme) private var theme
 
@@ -24,7 +30,7 @@ struct RecordingStage: View {
 
             Spacer().frame(height: 44)
 
-            DotWave(active: true, amplitude: amplitude, size: .lg)
+            DotWave(active: true, amplitude: amplitudeProvider, size: .lg)
 
             Spacer().frame(height: 36)
 
@@ -68,30 +74,19 @@ struct RecordingStage: View {
         }
     }
 
-    // MM:SS.t — minutes/seconds in ink, decisecond in mute. Tabular digits.
-    // TimelineView drives the redraw on its own schedule so we don't depend
-    // on an external Timer.publish push (which proved unreliable to wire up
-    // through the ContentView/RecordingController observation chain).
+    // MM:SS — calm, muted, no ticking deciseconds. Tabular digits.
     private var timer: some View {
-        TimelineView(.periodic(from: startedAt, by: 0.1)) { ctx in
+        TimelineView(.periodic(from: startedAt, by: 1.0)) { ctx in
             let elapsed = max(0, ctx.date.timeIntervalSince(startedAt))
-            let totalMs = Int(elapsed * 1000)
-            let sec = totalMs / 1000
+            let sec = Int(elapsed)
             let mm = String(format: "%02d", sec / 60)
             let ss = String(format: "%02d", sec % 60)
-            let ds = (totalMs % 1000) / 100
 
-            HStack(spacing: 0) {
-                Text("\(mm):\(ss)")
-                    .font(.paperRecordingTimer)
-                    .tracking(0.5)
-                    .foregroundStyle(theme.ink)
-                Text(".\(ds)")
-                    .font(.paperRecordingTimer)
-                    .tracking(0.5)
-                    .foregroundStyle(theme.mute)
-            }
-            .monospacedDigit()
+            Text("\(mm):\(ss)")
+                .font(.paperRecordingTimer)
+                .tracking(0.5)
+                .foregroundStyle(theme.mute)
+                .monospacedDigit()
         }
     }
 }
